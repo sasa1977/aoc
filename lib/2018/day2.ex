@@ -42,5 +42,5 @@ defmodule Aoc201802 do
   defp histogram(values), do: Enum.reduce(values, %{}, &add_value(&2, &1))
   defp add_value(histogram, value), do: Map.update(histogram, value, 1, &(&1 + 1))
 
-  defp ids(), do: Aoc.input_file(2018, 2) |> File.stream!() |> Stream.map(&String.trim/1)
+  defp ids(), do: Aoc.input_lines(2018, 2)
 end
