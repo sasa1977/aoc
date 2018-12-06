@@ -1,11 +1,6 @@
 defmodule Aoc201801 do
   def run() do
-    frequency_changes =
-      Aoc.input_file(2018, 1)
-      |> File.stream!()
-      |> Stream.map(&String.trim/1)
-      |> Stream.map(&String.to_integer/1)
-
+    frequency_changes = Aoc.input_lines(2018, 1) |> Stream.map(&String.to_integer/1)
     part1(frequency_changes) |> IO.inspect()
     part2(frequency_changes) |> IO.inspect()
   end
