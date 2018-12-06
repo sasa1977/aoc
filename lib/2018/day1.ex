@@ -13,7 +13,7 @@ defmodule Aoc201801 do
   defp part1(frequency_changes) do
     frequency_changes
     |> frequencies()
-    |> Enum.reduce(nil, fn frequency, _previous -> frequency end)
+    |> Aoc.EnumHelper.last_element()
   end
 
   defp part2(frequency_changes) do
@@ -28,8 +28,7 @@ defmodule Aoc201801 do
           else: {[], MapSet.put(frequencies, frequency)}
       end
     )
-    |> Enum.take(1)
-    |> hd()
+    |> Aoc.EnumHelper.first_element()
   end
 
   defp frequencies(frequency_changes) do
