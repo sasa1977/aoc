@@ -15,14 +15,7 @@ defmodule Aoc201801 do
     frequency_changes
     |> Stream.cycle()
     |> frequencies()
-    |> Stream.transform(
-      MapSet.new(),
-      fn frequency, frequencies ->
-        if MapSet.member?(frequencies, frequency),
-          do: {[frequency], frequencies},
-          else: {[], MapSet.put(frequencies, frequency)}
-      end
-    )
+    |> Aoc.EnumHelper.non_uniques()
     |> Aoc.EnumHelper.first_element()
   end
 

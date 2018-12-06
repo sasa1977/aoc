@@ -21,4 +21,18 @@ defmodule Aoc.EnumHelper do
 
     value
   end
+
+  @doc "Returns non-unique values of the input enumerable."
+  @spec non_uniques(Enumerable.t()) :: Enumerable.t()
+  def non_uniques(enumerable) do
+    Stream.transform(
+      enumerable,
+      MapSet.new(),
+      fn value, encountered ->
+        if MapSet.member?(encountered, value),
+          do: {[value], encountered},
+          else: {[], MapSet.put(encountered, value)}
+      end
+    )
+  end
 end
