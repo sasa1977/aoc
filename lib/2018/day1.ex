@@ -1,23 +1,24 @@
 defmodule Aoc201801 do
   def run() do
-    frequency_changes = Aoc.input_lines(2018, 1) |> Stream.map(&String.to_integer/1)
-    part1(frequency_changes) |> IO.inspect()
-    part2(frequency_changes) |> IO.inspect()
+    IO.inspect(part1())
+    IO.inspect(part2())
   end
 
-  defp part1(frequency_changes) do
-    frequency_changes
+  defp part1() do
+    frequency_changes()
     |> frequencies()
     |> Aoc.EnumHelper.last()
   end
 
-  defp part2(frequency_changes) do
-    frequency_changes
+  defp part2() do
+    frequency_changes()
     |> Stream.cycle()
     |> frequencies()
     |> Aoc.EnumHelper.non_uniques()
     |> Aoc.EnumHelper.first()
   end
+
+  defp frequency_changes(), do: Aoc.input_lines(2018, 1) |> Stream.map(&String.to_integer/1)
 
   defp frequencies(frequency_changes) do
     Stream.scan(
