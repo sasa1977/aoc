@@ -1,7 +1,7 @@
 defmodule Aoc201801 do
   def run() do
     frequency_changes =
-      Path.join([Application.app_dir(:aoc, "priv"), "2018", "day1.in"])
+      Aoc.input_file(2018, 1)
       |> File.stream!()
       |> Stream.map(&String.trim/1)
       |> Stream.map(&String.to_integer/1)
