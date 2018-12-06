@@ -35,7 +35,7 @@ defmodule Aoc201802 do
   defp letters_by_counts(id) do
     id
     |> to_charlist()
-    |> Aoc.EnumHelper.frequency_map()
+    |> Aoc.EnumHelper.frequencies()
     |> Enum.group_by(fn {_char, value} -> value end, fn {char, _value} -> char end)
   end
 

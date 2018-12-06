@@ -5,51 +5,67 @@ defmodule Aoc201806 do
   end
 
   defp part1(coordinates) do
-    reduce_known_universe(
-      coordinates,
-      %{},
-      fn position, coordinate_id, distance, state ->
-        new_value = %{id: coordinate_id, distance: distance, tie: false}
+    inner_ids = inner_ids(coordinates)
 
-        Map.update(state, position, new_value, fn
-          %{distance: ^distance} = value -> %{value | tie: true}
-          %{distance: smaller_distance} = value when smaller_distance < distance -> value
-          _larger_distance -> new_value
-        end)
-      end
-    )
-    |> Stream.filter(&match?({_position, %{tie: false}}, &1))
-    |> Stream.map(fn {_position, value} -> value.id end)
-    |> Aoc.EnumHelper.frequency_map()
+    coordinates
+    |> all_positions()
+    |> Stream.map(&closest(&1, coordinates))
+    |> Stream.reject(&(&1.id == :tie))
+    |> Stream.filter(&MapSet.member?(inner_ids, &1.id))
+    |> Aoc.EnumHelper.frequencies_by(& &1.id)
     |> Map.values()
     |> Enum.max()
   end
 
-  defp part2(coordinates) do
-    reduce_known_universe(
+  defp inner_ids(coordinates) do
+    bounds = bounds(coordinates)
+
+    coordinates
+    |> Stream.reject(&(&1.x in [bounds.left, bounds.right] or &1.y in [bounds.top, bounds.bottom]))
+    |> Stream.map(& &1.id)
+    |> MapSet.new()
+  end
+
+  defp closest(position, coordinates) do
+    Enum.reduce(
       coordinates,
-      %{},
-      fn position, _coordinate_id, distance, state -> Map.update(state, position, distance, &(&1 + distance)) end
+      nil,
+      fn coordinate, current_closest ->
+        new_closest = %{id: coordinate.id, distance: manhattan_distance(coordinate, position)}
+
+        cond do
+          is_nil(current_closest) -> new_closest
+          new_closest.distance == current_closest.distance -> %{current_closest | id: :tie}
+          new_closest.distance < current_closest.distance -> new_closest
+          true -> current_closest
+        end
+      end
     )
-    |> Map.values()
+  end
+
+  defp all_positions(coordinates) do
+    bounds = bounds(coordinates)
+    for x <- bounds.left..bounds.right, y <- bounds.top..bounds.bottom, do: %{x: x, y: y}
+  end
+
+  defp bounds(coordinates) do
+    {%{x: left}, %{x: right}} = Enum.min_max_by(coordinates, & &1.x, & &1.x)
+    {%{y: top}, %{y: bottom}} = Enum.min_max_by(coordinates, & &1.y, & &1.y)
+    %{left: left, right: right, top: top, bottom: bottom}
+  end
+
+  defp part2(coordinates) do
+    coordinates
+    |> all_positions()
+    |> Stream.map(&total_distance(&1, coordinates))
     |> Stream.filter(&(&1 < 10_000))
     |> Enum.count()
   end
 
-  defp reduce_known_universe(coordinates, state, fun) do
-    x_range = Enum.min_by(coordinates, & &1.x).x..Enum.max_by(coordinates, & &1.x).x
-    y_range = Enum.min_by(coordinates, & &1.y).y..Enum.max_by(coordinates, & &1.y).y
-
-    Enum.reduce(x_range.first..x_range.last, state, fn x, state ->
-      Enum.reduce(y_range.first..y_range.last, state, fn y, state ->
-        position = %{x: x, y: y}
-
-        Enum.reduce(coordinates, state, fn coordinate, state ->
-          distance = manhattan_distance(position, coordinate)
-          fun.(position, coordinate.id, distance, state)
-        end)
-      end)
-    end)
+  defp total_distance(point, coordinates) do
+    coordinates
+    |> Stream.map(&manhattan_distance(&1, point))
+    |> Enum.sum()
   end
 
   defp manhattan_distance(a, b), do: abs(a.x - b.x) + abs(a.y - b.y)

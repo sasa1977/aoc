@@ -54,7 +54,7 @@ defmodule Aoc201804 do
     {minute, days} =
       guard
       |> sleep_minutes()
-      |> Aoc.EnumHelper.frequency_map()
+      |> Aoc.EnumHelper.frequencies()
       |> Enum.max_by(fn {_minute, days} -> days end)
 
     %{minute: minute, days: days}
