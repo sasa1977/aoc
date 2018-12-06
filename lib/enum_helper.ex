@@ -16,8 +16,7 @@ defmodule Aoc.EnumHelper do
   @doc "Returns the last element of the given non-empty enumerable."
   @spec last(Enumerable.t()) :: value :: any
   def last(enumerable) do
-    {:ok, value} =
-      Enum.reduce(enumerable, {:error, :empty}, fn value, _previous -> {:ok, value} end)
+    {:ok, value} = Enum.reduce(enumerable, {:error, :empty}, fn value, _previous -> {:ok, value} end)
 
     value
   end
