@@ -8,7 +8,7 @@ defmodule Aoc201801 do
   defp part1(frequency_changes) do
     frequency_changes
     |> frequencies()
-    |> Aoc.EnumHelper.last_element()
+    |> Aoc.EnumHelper.last()
   end
 
   defp part2(frequency_changes) do
@@ -16,7 +16,7 @@ defmodule Aoc201801 do
     |> Stream.cycle()
     |> frequencies()
     |> Aoc.EnumHelper.non_uniques()
-    |> Aoc.EnumHelper.first_element()
+    |> Aoc.EnumHelper.first()
   end
 
   defp frequencies(frequency_changes) do
