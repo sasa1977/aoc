@@ -35,12 +35,9 @@ defmodule Aoc201802 do
   defp letters_by_counts(id) do
     id
     |> to_charlist()
-    |> histogram()
+    |> Aoc.EnumHelper.frequency_map()
     |> Enum.group_by(fn {_char, value} -> value end, fn {char, _value} -> char end)
   end
-
-  defp histogram(values), do: Enum.reduce(values, %{}, &add_value(&2, &1))
-  defp add_value(histogram, value), do: Map.update(histogram, value, 1, &(&1 + 1))
 
   defp ids(), do: Aoc.input_lines(2018, 2)
 end

@@ -54,14 +54,11 @@ defmodule Aoc201804 do
     {minute, days} =
       guard
       |> sleep_minutes()
-      |> histogram()
+      |> Aoc.EnumHelper.frequency_map()
       |> Enum.max_by(fn {_minute, days} -> days end)
 
     %{minute: minute, days: days}
   end
-
-  defp histogram(values), do: Enum.reduce(values, %{}, &add_value(&2, &1))
-  defp add_value(histogram, value), do: Map.update(histogram, value, 1, &(&1 + 1))
 
   defp ordered_events() do
     Aoc.input_lines(2018, 4)
