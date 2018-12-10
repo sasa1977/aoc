@@ -38,4 +38,8 @@ defmodule Aoc.EnumHelper do
       end
     )
   end
+
+  @doc "Returns true if all elements of the given enumerable are the same."
+  @spec all_same?(Enumerable.t()) :: boolean
+  def all_same?(enumerable), do: enumerable |> Stream.uniq() |> Enum.take(2) |> Enum.count() == 1
 end
