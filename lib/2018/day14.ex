@@ -7,7 +7,7 @@ defmodule Aoc201814 do
   defp part1(), do: recipes() |> Stream.drop(306_281) |> Enum.take(10) |> Enum.join("") |> IO.puts()
 
   defp part2() do
-    target_recipes = 306_281 |> to_string() |> to_charlist() |> Enum.map(&(&1 - ?0))
+    target_recipes = Enum.map('306281', &(&1 - ?0))
     find_sublist_index(recipes(), target_recipes) |> IO.puts()
   end
 
@@ -18,6 +18,7 @@ defmodule Aoc201814 do
       fn
         el, {[el], _sublist, index} -> {:halt, index + 1 - length(sublist)}
         el, {[el | rest], sublist, index} -> {:cont, {rest, sublist, index + 1}}
+        el, {_, [el | rest] = sublist, index} -> {:cont, {rest, sublist, index + 1}}
         _el, {_, sublist, index} -> {:cont, {sublist, sublist, index + 1}}
       end
     )
