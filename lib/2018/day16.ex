@@ -91,42 +91,28 @@ defmodule Aoc201816 do
   defp get_reg(machine, pos), do: Map.fetch!(machine, pos)
   defp put_reg(machine, pos, value), do: Map.put(machine, pos, value)
 
-  Module.register_attribute(__MODULE__, :all_instructions, accumulate: true)
+  defp all_instructions(), do: Map.keys(instructions())
 
-  for {binary_instr, fun} <- [
-        {:add, quote(do: &+/2)},
-        {:mul, quote(do: &*/2)},
-        {:ban, quote(do: &:erlang.band/2)},
-        {:bor, quote(do: &:erlang.bor/2)}
-      ] do
-    @all_instructions :"#{binary_instr}r"
-    defp exec(machine, unquote(:"#{binary_instr}r"), reg_a, reg_b, reg_c),
-      do: put_reg(machine, reg_c, unquote(fun).(get_reg(machine, reg_a), get_reg(machine, reg_b)))
+  defp exec(machine, instruction, a, b, c), do: Map.fetch!(instructions(), instruction).(machine, a, b, c)
 
-    @all_instructions :"#{binary_instr}i"
-    defp exec(machine, unquote(:"#{binary_instr}i"), reg_a, val_b, reg_c),
-      do: put_reg(machine, reg_c, unquote(fun).(get_reg(machine, reg_a), val_b))
+  defp instructions() do
+    %{
+      addr: &put_reg(&1, &4, get_reg(&1, &2) + get_reg(&1, &3)),
+      addi: &put_reg(&1, &4, get_reg(&1, &2) + &3),
+      mulr: &put_reg(&1, &4, get_reg(&1, &2) * get_reg(&1, &3)),
+      muli: &put_reg(&1, &4, get_reg(&1, &2) * &3),
+      banr: &put_reg(&1, &4, :erlang.band(get_reg(&1, &2), get_reg(&1, &3))),
+      bani: &put_reg(&1, &4, :erlang.band(get_reg(&1, &2), &3)),
+      borr: &put_reg(&1, &4, :erlang.bor(get_reg(&1, &2), get_reg(&1, &3))),
+      bori: &put_reg(&1, &4, :erlang.bor(get_reg(&1, &2), &3)),
+      gtir: &put_reg(&1, &4, if(&2 > get_reg(&1, &3), do: 1, else: 0)),
+      gtri: &put_reg(&1, &4, if(get_reg(&1, &2) > &3, do: 1, else: 0)),
+      gtrr: &put_reg(&1, &4, if(get_reg(&1, &2) > get_reg(&1, &3), do: 1, else: 0)),
+      eqir: &put_reg(&1, &4, if(&2 == get_reg(&1, &3), do: 1, else: 0)),
+      eqri: &put_reg(&1, &4, if(get_reg(&1, &2) == &3, do: 1, else: 0)),
+      eqrr: &put_reg(&1, &4, if(get_reg(&1, &2) == get_reg(&1, &3), do: 1, else: 0)),
+      setr: fn machine, reg_a, _b, reg_c -> put_reg(machine, reg_c, get_reg(machine, reg_a)) end,
+      seti: fn machine, val, _b, reg_c -> put_reg(machine, reg_c, val) end
+    }
   end
-
-  for {comp_instr, fun} <- [{:gt, quote(do: &>/2)}, {:eq, quote(do: &==/2)}] do
-    @all_instructions :"#{comp_instr}ir"
-    defp exec(machine, unquote(:"#{comp_instr}ir"), val_a, reg_b, reg_c),
-      do: put_reg(machine, reg_c, if(unquote(fun).(val_a, get_reg(machine, reg_b)), do: 1, else: 0))
-
-    @all_instructions :"#{comp_instr}ri"
-    defp exec(machine, unquote(:"#{comp_instr}ri"), reg_a, val_b, reg_c),
-      do: put_reg(machine, reg_c, if(unquote(fun).(get_reg(machine, reg_a), val_b), do: 1, else: 0))
-
-    @all_instructions :"#{comp_instr}rr"
-    defp exec(machine, unquote(:"#{comp_instr}rr"), reg_a, reg_b, reg_c),
-      do: put_reg(machine, reg_c, if(unquote(fun).(get_reg(machine, reg_a), get_reg(machine, reg_b)), do: 1, else: 0))
-  end
-
-  @all_instructions :setr
-  defp exec(machine, :setr, reg_a, _b, reg_c), do: put_reg(machine, reg_c, get_reg(machine, reg_a))
-
-  @all_instructions :seti
-  defp exec(machine, :seti, val_a, _b, reg_c), do: put_reg(machine, reg_c, val_a)
-
-  defp all_instructions(), do: unquote(Enum.reverse(@all_instructions))
 end
