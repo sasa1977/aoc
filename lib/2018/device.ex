@@ -9,7 +9,8 @@ defmodule Aoc2018.Device do
     |> new()
   end
 
-  def all_states(device, opts \\ []), do: Stream.iterate(device, &next_state(&1, opts))
+  def all_states(device, opts \\ []),
+    do: device |> Stream.iterate(&next_state(&1, opts)) |> Stream.take_while(&(not is_nil(&1)))
 
   def register(device, pos), do: Map.fetch!(device.registers, pos)
   def put_register(device, pos, value), do: %{device | registers: Map.put(device.registers, pos, value)}
@@ -31,6 +32,8 @@ defmodule Aoc2018.Device do
       registers: 0..5 |> Stream.map(&{&1, 0}) |> Map.new()
     }
   end
+
+  defp next_state(%{ip: ip, instructions: instructions}, _opts) when ip < 0 or ip >= tuple_size(instructions), do: nil
 
   defp next_state(device, opts) do
     case Map.fetch(Keyword.get(opts, :optimize, %{}), device.ip) do
