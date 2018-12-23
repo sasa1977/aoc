@@ -55,14 +55,14 @@ defmodule Aoc201822 do
     do: Enum.reduce(search_state.positions, search_state, &expand_position(&2, &1))
 
   defp expand_position(search_state, {{x, y}, tool} = pos) do
-    positions = Stream.filter([{x, y - 1}, {x, y + 1}, {x - 1, y}, {x + 1, y}], fn {x, y} -> x >= 0 and y >= 0 end)
+    positions = Enum.filter([{x, y - 1}, {x, y + 1}, {x - 1, y}, {x + 1, y}], fn {x, y} -> x >= 0 and y >= 0 end)
     cave = Enum.reduce(positions, search_state.cave, &expand_to_pos(&2, &1))
 
     pending =
       positions
-      |> Stream.flat_map(&next_positions(pos, &1, cave))
-      |> Stream.reject(&MapSet.member?(search_state.visited, &1))
-      |> Stream.map(&{transition_time(&1, tool, search_state.time), &1})
+      |> Enum.flat_map(&next_positions(pos, &1, cave))
+      |> Enum.reject(&MapSet.member?(search_state.visited, &1))
+      |> Enum.map(&{transition_time(&1, tool, search_state.time), &1})
       |> Enum.reduce(
         search_state.pending,
         fn {time, pos}, pending ->
