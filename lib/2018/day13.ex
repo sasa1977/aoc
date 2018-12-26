@@ -5,12 +5,12 @@ defmodule Aoc201813 do
   end
 
   defp part1() do
-    %{crashes: [{y, x}]} = all_ticks() |> Stream.drop_while(&Enum.empty?(&1.crashes)) |> Aoc.EnumHelper.first()
+    %{crashes: [{y, x}]} = all_ticks() |> Stream.drop_while(&Enum.empty?(&1.crashes)) |> Enum.at(0)
     IO.puts("#{x},#{y}")
   end
 
   defp part2() do
-    %{carts: carts} = all_ticks() |> Stream.drop_while(&(Map.size(&1.carts) > 1)) |> Aoc.EnumHelper.first()
+    %{carts: carts} = all_ticks() |> Stream.drop_while(&(Map.size(&1.carts) > 1)) |> Enum.at(0)
     [{{y, x}, _cart}] = Enum.to_list(carts)
     IO.puts("#{x},#{y}")
   end

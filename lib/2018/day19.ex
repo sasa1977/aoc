@@ -6,11 +6,11 @@ defmodule Aoc201819 do
     IO.puts(part2())
   end
 
-  defp part1(), do: all_device_states() |> Aoc.EnumHelper.last() |> Device.register(0)
+  defp part1(), do: all_device_states() |> Enum.at(-1) |> Device.register(0)
 
   defp part2() do
     all_device_states(input: 1, optimize: %{1 => &optimize_part_2/1})
-    |> Aoc.EnumHelper.last()
+    |> Enum.at(-1)
     |> Device.register(0)
   end
 

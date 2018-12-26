@@ -13,18 +13,6 @@ defmodule Aoc.EnumHelper do
     )
   end
 
-  @doc "Returns the first element of the given non-empty enumerable."
-  @spec first(Enumerable.t()) :: value :: any
-  def first(enumerable), do: enumerable |> Enum.take(1) |> hd()
-
-  @doc "Returns the last element of the given non-empty enumerable."
-  @spec last(Enumerable.t()) :: value :: any
-  def last(enumerable) do
-    {:ok, value} = Enum.reduce(enumerable, {:error, :empty}, fn value, _previous -> {:ok, value} end)
-
-    value
-  end
-
   @doc "Returns non-unique values of the input enumerable."
   @spec non_uniques(Enumerable.t()) :: Enumerable.t()
   def non_uniques(enumerable) do

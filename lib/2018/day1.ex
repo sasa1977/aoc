@@ -7,7 +7,7 @@ defmodule Aoc201801 do
   defp part1() do
     frequency_changes()
     |> frequencies()
-    |> Aoc.EnumHelper.last()
+    |> Enum.at(-1)
   end
 
   defp part2() do
@@ -15,7 +15,7 @@ defmodule Aoc201801 do
     |> Stream.cycle()
     |> frequencies()
     |> Aoc.EnumHelper.non_uniques()
-    |> Aoc.EnumHelper.first()
+    |> Enum.at(0)
   end
 
   defp frequency_changes(), do: Aoc.input_lines(2018, 1) |> Stream.map(&String.to_integer/1)

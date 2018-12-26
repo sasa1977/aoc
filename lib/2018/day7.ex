@@ -4,7 +4,7 @@ defmodule Aoc201807 do
     instructions() |> part2() |> IO.inspect()
   end
 
-  defp part1(instructions), do: (instructions |> all_states(workers: 1) |> Aoc.EnumHelper.last()).processed
+  defp part1(instructions), do: (instructions |> all_states(workers: 1) |> Enum.at(-1)).processed
   defp part2(instructions), do: duration(all_states(instructions, workers: 5))
 
   defp duration(all_states),
@@ -55,7 +55,7 @@ defmodule Aoc201807 do
     state
     |> Stream.iterate(&maybe_process/1)
     |> Stream.take_while(&(not is_nil(&1)))
-    |> Aoc.EnumHelper.last()
+    |> Enum.at(-1)
   end
 
   defp maybe_process(state) do

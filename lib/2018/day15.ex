@@ -17,7 +17,7 @@ defmodule Aoc201815 do
     |> Board.score()
   end
 
-  defp play_game(attack_powers), do: attack_powers |> all_states() |> Aoc.EnumHelper.last()
+  defp play_game(attack_powers), do: attack_powers |> all_states() |> Enum.at(-1)
 
   defp all_states(attack_powers) do
     {elements, units} = parse_input()

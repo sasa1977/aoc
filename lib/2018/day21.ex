@@ -6,8 +6,8 @@ defmodule Aoc201821 do
     IO.puts(part2())
   end
 
-  defp part1(), do: Aoc.EnumHelper.first(terminating_inputs())
-  defp part2(), do: Aoc.EnumHelper.last(terminating_inputs())
+  defp part1(), do: Enum.at(terminating_inputs(), 0)
+  defp part2(), do: Enum.at(terminating_inputs(), -1)
 
   defp terminating_inputs() do
     Aoc.input_file(2018, 21)
