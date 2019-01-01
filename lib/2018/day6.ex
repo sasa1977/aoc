@@ -5,24 +5,30 @@ defmodule Aoc201806 do
   end
 
   defp part1(coordinates) do
-    inner_ids = inner_ids(coordinates)
+    closest_map =
+      coordinates
+      |> all_positions()
+      |> Stream.map(&{&1, closest(&1, coordinates)})
+      |> Map.new()
 
-    coordinates
-    |> all_positions()
-    |> Stream.map(&closest(&1, coordinates))
-    |> Stream.reject(&(&1.id == :tie))
-    |> Stream.filter(&MapSet.member?(inner_ids, &1.id))
+    infinite_ids = infinite_ids(coordinates, closest_map)
+
+    closest_map
+    |> Map.values()
+    |> Stream.reject(&(&1.id == :time or MapSet.member?(infinite_ids, &1.id)))
     |> Aoc.EnumHelper.frequencies_by(& &1.id)
     |> Map.values()
     |> Enum.max()
   end
 
-  defp inner_ids(coordinates) do
+  defp infinite_ids(coordinates, closest_map) do
     bounds = bounds(coordinates)
 
-    coordinates
-    |> Stream.reject(&(&1.x in [bounds.left, bounds.right] or &1.y in [bounds.top, bounds.bottom]))
-    |> Stream.map(& &1.id)
+    Stream.concat(
+      Stream.flat_map(bounds.top..bounds.bottom, &[%{x: bounds.left, y: &1}, %{x: bounds.right, y: &1}]),
+      Stream.flat_map(bounds.left..bounds.right, &[%{x: &1, y: bounds.top}, %{x: &1, y: bounds.bottom}])
+    )
+    |> Stream.map(&Map.fetch!(closest_map, &1).id)
     |> MapSet.new()
   end
 
