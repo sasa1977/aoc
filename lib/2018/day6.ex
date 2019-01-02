@@ -15,7 +15,7 @@ defmodule Aoc201806 do
 
     closest_map
     |> Map.values()
-    |> Stream.reject(&(&1.id == :time or MapSet.member?(infinite_ids, &1.id)))
+    |> Stream.reject(&(&1.id == :tie or MapSet.member?(infinite_ids, &1.id)))
     |> Aoc.EnumHelper.frequencies_by(& &1.id)
     |> Map.values()
     |> Enum.max()
