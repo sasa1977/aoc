@@ -2,4 +2,4 @@
 
 Usage: `mix run -e AocYYYYDD`.
 
-Example: `mix run -e Aoc201801`
+Example: `mix run -e Aoc201801.run`
