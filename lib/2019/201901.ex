@@ -27,6 +27,5 @@ defmodule Aoc201901 do
     |> Enum.sum()
   end
 
-  defp required_fuel_simple(mass),
-    do: max((mass |> div(3) |> trunc()) - 2, 0)
+  defp required_fuel_simple(mass), do: max(div(mass, 3) - 2, 0)
 end
