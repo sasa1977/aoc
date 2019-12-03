@@ -69,7 +69,7 @@ defmodule Aoc201815 do
       winner
     end
 
-    def num_units(board), do: Map.size(board.units)
+    def num_units(board), do: map_size(board.units)
 
     def next_play(board) do
       if board.units |> Map.values() |> Stream.map(& &1.type) |> Aoc.EnumHelper.all_same?() do

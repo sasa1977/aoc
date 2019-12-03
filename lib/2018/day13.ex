@@ -10,7 +10,7 @@ defmodule Aoc201813 do
   end
 
   defp part2() do
-    %{carts: carts} = all_ticks() |> Stream.drop_while(&(Map.size(&1.carts) > 1)) |> Enum.at(0)
+    %{carts: carts} = all_ticks() |> Stream.drop_while(&(map_size(&1.carts) > 1)) |> Enum.at(0)
     [{{y, x}, _cart}] = Enum.to_list(carts)
     IO.puts("#{x},#{y}")
   end

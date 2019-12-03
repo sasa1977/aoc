@@ -78,7 +78,7 @@ defmodule Aoc201818 do
       |> Stream.flat_map(&elements/1)
       |> Map.new()
 
-    %{map: map, size: map |> Map.size() |> :math.sqrt() |> round()}
+    %{map: map, size: map |> map_size() |> :math.sqrt() |> round()}
   end
 
   defp elements({chars, y}),
