@@ -30,22 +30,30 @@ defmodule Aoc201904 do
     |> Stream.take_while(&(&1 <= range.last))
   end
 
-  defp next_valid_password(from) do
-    [0 | Integer.digits(from)]
-    |> Stream.chunk_every(2, 1, :discard)
-    |> Stream.take_while(fn [prev_digit, digit] -> digit >= prev_digit end)
-    |> Enum.map(fn [_, digit] -> digit end)
+  defp next_valid_password(candidate) do
+    candidate
+    |> valid_prefix()
     |> complete_password()
     |> Integer.undigits()
   end
 
+  defp valid_prefix(candidate) do
+    [0 | Integer.digits(candidate)]
+    |> Stream.chunk_every(2, 1, :discard)
+    |> Stream.take_while(fn [prev_digit, digit] -> digit >= prev_digit end)
+    |> Enum.map(fn [_, digit] -> digit end)
+  end
+
   defp complete_password([a, b, c, d, e, f] = digits) do
     if a == b or b == c or c == d or d == e or e == f,
+      # digits form a valid password, so return them
       do: digits,
+      # digits are strictly monotonoic, so the next valid password is abcdff
       else: [a, b, c, d, f, f]
   end
 
-  defp complete_password(prefix) do
+  defp complete_password(prefix) when length(prefix) < 6 do
+    # prefix is not complete -> repeat the last digit to complete the number
     last_digit = List.last(prefix)
     prefix ++ List.duplicate(last_digit, 6 - length(prefix))
   end
