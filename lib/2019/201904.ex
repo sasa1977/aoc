@@ -20,13 +20,8 @@ defmodule Aoc201904 do
   end
 
   defp valid_passwords(range) do
-    Stream.unfold(
-      range.first,
-      fn candidate ->
-        next_valid_password = next_valid_password(candidate)
-        {next_valid_password, next_valid_password + 1}
-      end
-    )
+    next_valid_password(range.first)
+    |> Stream.iterate(&next_valid_password(&1 + 1))
     |> Stream.take_while(&(&1 <= range.last))
   end
 
