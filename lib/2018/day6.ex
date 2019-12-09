@@ -77,7 +77,7 @@ defmodule Aoc201806 do
   defp manhattan_distance(a, b), do: abs(a.x - b.x) + abs(a.y - b.y)
 
   defp coordinates() do
-    Aoc.input_lines(2018, 6)
+    Aoc.input_lines(__MODULE__)
     |> Stream.map(&parse_coordinate/1)
     |> Stream.with_index()
     |> Enum.map(fn {coordinate, offset} -> Map.put(coordinate, :id, "#{[?A + offset]}") end)

@@ -38,5 +38,5 @@ defmodule Aoc201906 do
   end
 
   defp direct_orbits(),
-    do: Stream.map(Aoc.input_lines(2019, 06), &String.split(&1, ")"))
+    do: Stream.map(Aoc.input_lines(__MODULE__), &String.split(&1, ")"))
 end

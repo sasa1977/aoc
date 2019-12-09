@@ -85,7 +85,7 @@ defmodule Aoc201807 do
   defp available_steps(state), do: state.remaining_steps |> MapSet.difference(child_steps(state)) |> Enum.to_list()
   defp child_steps(state), do: state.instructions |> Stream.map(& &1.child) |> MapSet.new()
 
-  defp instructions(), do: Enum.map(Aoc.input_lines(2018, 7), &parse_instruction/1)
+  defp instructions(), do: Enum.map(Aoc.input_lines(__MODULE__), &parse_instruction/1)
 
   defp parse_instruction(instruction) do
     %{"parent" => parent, "child" => child} =

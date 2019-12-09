@@ -119,7 +119,7 @@ defmodule Aoc201823 do
 
   defp manhattan_distance(pos1, pos2), do: abs(pos1.x - pos2.x) + abs(pos1.y - pos2.y) + abs(pos1.z - pos2.z)
 
-  defp bots(), do: Enum.map(Aoc.input_lines(2018, 23), &parse_bot/1)
+  defp bots(), do: Enum.map(Aoc.input_lines(__MODULE__), &parse_bot/1)
 
   defp parse_bot(bot_def) do
     %{"center" => center, "r" => radius} = Regex.named_captures(~r/pos=<(?<center>.+)>, r=(?<r>.*)/, bot_def)

@@ -54,7 +54,7 @@ defmodule Aoc201803 do
       do: %{left: left, right: right, top: top, bottom: bottom, claims: [claim1.id, claim2.id]}
   end
 
-  defp claims(), do: Aoc.input_lines(2018, 3) |> Enum.map(&parse_rectangle/1)
+  defp claims(), do: Aoc.input_lines(__MODULE__) |> Enum.map(&parse_rectangle/1)
 
   defp parse_rectangle(encoded_rectangle) do
     captures =

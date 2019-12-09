@@ -17,7 +17,7 @@ defmodule Aoc201901 do
   end
 
   defp module_masses(),
-    do: Stream.map(Aoc.input_lines(2019, 1), &String.to_integer/1)
+    do: Stream.map(Aoc.input_lines(__MODULE__), &String.to_integer/1)
 
   defp required_fuel_precise(mass) do
     mass

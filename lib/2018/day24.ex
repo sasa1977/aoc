@@ -103,7 +103,7 @@ defmodule Aoc201824 do
   defp effective_power(group), do: group.units * group.damage
 
   defp groups() do
-    Aoc.input_file(2018, 24)
+    Aoc.input_file(__MODULE__)
     |> File.read!()
     |> String.trim()
     |> String.split("\n\n")

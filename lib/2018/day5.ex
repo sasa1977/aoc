@@ -38,7 +38,7 @@ defmodule Aoc201805 do
   defp opposite_polarities?(a, b), do: abs(a - b) == ?a - ?A
 
   defp polymer() do
-    Aoc.input_file(2018, 3)
+    Aoc.input_file(__MODULE__)
     |> File.read!()
     |> to_charlist()
     |> Enum.reject(&(&1 == ?\n))

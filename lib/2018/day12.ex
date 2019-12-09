@@ -90,7 +90,7 @@ defmodule Aoc201812 do
   end
 
   defp initial_state() do
-    {initial_state, rules} = Enum.split(Aoc.input_lines(2018, 12), 2)
+    {initial_state, rules} = Enum.split(Aoc.input_lines(__MODULE__), 2)
     pad_plants(%{position: 0, plants: parse_plants(initial_state), rules: parse_rules(rules)})
   end
 

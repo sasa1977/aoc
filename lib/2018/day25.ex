@@ -27,6 +27,6 @@ defmodule Aoc201825 do
   defp manhattan_distance({x1, y1, z1, t1}, {x2, y2, z2, t2}),
     do: abs(x1 - x2) + abs(y1 - y2) + abs(z1 - z2) + abs(t1 - t2)
 
-  defp points(), do: Aoc.input_lines(2018, 25) |> Stream.map(&String.split(&1, ",")) |> Enum.map(&parse_point/1)
+  defp points(), do: Aoc.input_lines(__MODULE__) |> Stream.map(&String.split(&1, ",")) |> Enum.map(&parse_point/1)
   defp parse_point(coordinates), do: coordinates |> Enum.map(&String.to_integer/1) |> List.to_tuple()
 end

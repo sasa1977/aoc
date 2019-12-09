@@ -39,5 +39,5 @@ defmodule Aoc201802 do
     |> Enum.group_by(fn {_char, value} -> value end, fn {char, _value} -> char end)
   end
 
-  defp ids(), do: Aoc.input_lines(2018, 2)
+  defp ids(), do: Aoc.input_lines(__MODULE__)
 end

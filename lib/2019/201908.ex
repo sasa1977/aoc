@@ -46,7 +46,7 @@ defmodule Aoc201908 do
   end
 
   defp layers() do
-    Aoc.input_file(2019, 8)
+    Aoc.input_file(__MODULE__)
     |> File.stream!([], 1)
     |> Stream.reject(&(&1 == "\n"))
     |> Stream.map(&String.to_integer/1)

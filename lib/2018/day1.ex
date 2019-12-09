@@ -18,7 +18,7 @@ defmodule Aoc201801 do
     |> Enum.at(0)
   end
 
-  defp frequency_changes(), do: Aoc.input_lines(2018, 1) |> Stream.map(&String.to_integer/1)
+  defp frequency_changes(), do: Aoc.input_lines(__MODULE__) |> Stream.map(&String.to_integer/1)
 
   defp frequencies(frequency_changes) do
     Stream.scan(

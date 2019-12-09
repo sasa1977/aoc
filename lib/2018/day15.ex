@@ -34,7 +34,7 @@ defmodule Aoc201815 do
 
   defp parse_input() do
     {elements, units} =
-      Aoc.input_lines(2018, 15)
+      Aoc.input_lines(__MODULE__)
       |> Stream.with_index()
       |> Stream.flat_map(fn {line, y} -> line |> to_charlist() |> Stream.with_index() |> Stream.map(&{&1, y}) end)
       |> Stream.map(fn {{symbol, x}, y} -> parse_symbol(symbol, {y, x}) end)

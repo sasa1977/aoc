@@ -90,7 +90,7 @@ defmodule Aoc201817 do
     |> Enum.reduce(state, &store_water_state(&2, &1, :flow))
   end
 
-  defp clay(), do: Aoc.input_lines(2018, 17) |> Stream.flat_map(&positions/1) |> MapSet.new()
+  defp clay(), do: Aoc.input_lines(__MODULE__) |> Stream.flat_map(&positions/1) |> MapSet.new()
 
   defp positions(line) do
     %{"value_dim" => value_dim, "value" => value, "range_dim" => range_dim, "from" => from, "to" => to} =

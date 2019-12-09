@@ -5,7 +5,7 @@ defmodule Aoc201808 do
   end
 
   defp numbers() do
-    Aoc.input_file(2018, 8)
+    Aoc.input_file(__MODULE__)
     |> File.read!()
     |> String.split()
     |> Enum.map(&String.to_integer/1)

@@ -15,7 +15,7 @@ defmodule Aoc201819 do
   end
 
   defp all_device_states(opts \\ []) do
-    Aoc.input_file(2018, 19)
+    Aoc.input_file(__MODULE__)
     |> Device.from_file()
     |> Device.put_register(0, Keyword.get(opts, :input, 0))
     |> Device.all_states(Keyword.take(opts, [:optimize]))

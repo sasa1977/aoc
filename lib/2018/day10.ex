@@ -7,7 +7,7 @@ defmodule Aoc201810 do
   defp part1(), do: points() |> all_states() |> Enum.find(&message_appeared?/1) |> printable_map()
   defp part2(), do: points() |> all_states() |> Stream.take_while(&(not message_appeared?(&1))) |> Enum.count()
 
-  defp points(), do: Enum.map(Aoc.input_lines(2018, 10), &parse_line/1)
+  defp points(), do: Enum.map(Aoc.input_lines(__MODULE__), &parse_line/1)
 
   defp parse_line(line) do
     %{"vx" => vx, "vy" => vy, "x" => x, "y" => y} =

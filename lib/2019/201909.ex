@@ -137,7 +137,7 @@ defmodule Aoc201909 do
   end
 
   defp initial_memory() do
-    Aoc.input_file(2019, 9)
+    Aoc.input_file(__MODULE__)
     |> File.read!()
     |> String.trim()
     |> String.split(",")

@@ -10,7 +10,7 @@ defmodule Aoc201821 do
   defp part2(), do: Enum.at(terminating_inputs(), -1)
 
   defp terminating_inputs() do
-    Aoc.input_file(2018, 21)
+    Aoc.input_file(__MODULE__)
     |> Device.from_file()
     |> Device.all_states(optimize: %{18 => &optimized_inner_loop/1})
     # according to the input program, termination happens in instruction 28, if input (r0) == r1

@@ -53,7 +53,7 @@ defmodule Aoc201903 do
   end
 
   defp wires(),
-    do: Aoc.input_lines(2019, 3) |> Enum.map(&parse_wire/1) |> Enum.map(&segments/1)
+    do: Aoc.input_lines(__MODULE__) |> Enum.map(&parse_wire/1) |> Enum.map(&segments/1)
 
   defp parse_wire(wire_str),
     do: wire_str |> String.split(",") |> Enum.map(&parse_step/1)

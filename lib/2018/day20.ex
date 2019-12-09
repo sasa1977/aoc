@@ -10,7 +10,7 @@ defmodule Aoc201820 do
   defp part2(), do: rooms() |> Stream.filter(&(&1.distance >= 1000)) |> Enum.count()
 
   def rooms() do
-    Aoc.input_file(2018, 20)
+    Aoc.input_file(__MODULE__)
     |> File.read!()
     |> String.trim()
     |> Parser.instructions()

@@ -125,7 +125,7 @@ defmodule Aoc201905 do
 
   defp machine() do
     memory =
-      Aoc.input_file(2019, 5)
+      Aoc.input_file(__MODULE__)
       |> File.read!()
       |> String.trim()
       |> String.split(",")

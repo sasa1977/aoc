@@ -76,7 +76,7 @@ defmodule Aoc201902 do
 
   defp input_program() do
     memory =
-      Aoc.input_file(2019, 2)
+      Aoc.input_file(__MODULE__)
       |> File.read!()
       |> String.trim()
       |> String.split(",")

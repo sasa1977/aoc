@@ -84,7 +84,7 @@ defmodule Aoc201813 do
   end
 
   defp input_map() do
-    Aoc.input_file(2018, 13)
+    Aoc.input_file(__MODULE__)
     |> File.stream!()
     |> Stream.map(&String.trim_trailing/1)
     |> Stream.map(&to_charlist/1)

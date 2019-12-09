@@ -72,7 +72,7 @@ defmodule Aoc201818 do
 
   defp grid() do
     map =
-      Aoc.input_lines(2018, 18)
+      Aoc.input_lines(__MODULE__)
       |> Stream.map(&to_charlist/1)
       |> Stream.with_index()
       |> Stream.flat_map(&elements/1)

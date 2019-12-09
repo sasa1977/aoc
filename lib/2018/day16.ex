@@ -14,7 +14,7 @@ defmodule Aoc201816 do
   defp part2(input), do: input.program |> exec_program(reverse_engineer_instructions(input.trace)) |> get_reg(0)
 
   defp read_input() do
-    [trace, program] = Aoc.input_file(2018, 16) |> File.read!() |> String.split(~r/\n\n\n+/)
+    [trace, program] = Aoc.input_file(__MODULE__) |> File.read!() |> String.split(~r/\n\n\n+/)
     %{trace: parse_trace(trace), program: parse_program(program)}
   end
 

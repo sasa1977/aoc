@@ -61,7 +61,7 @@ defmodule Aoc201804 do
   end
 
   defp ordered_events() do
-    Aoc.input_lines(2018, 4)
+    Aoc.input_lines(__MODULE__)
     |> Enum.sort()
     |> Stream.map(&decode_event/1)
   end
