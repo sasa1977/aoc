@@ -1,148 +1,164 @@
 defmodule Aoc201909 do
+  alias __MODULE__.Intcode
+
   def run do
     IO.inspect(part1())
     IO.inspect(part2())
   end
 
-  defp part1(), do: machine() |> push_input(1) |> run() |> output()
-  defp part2(), do: machine() |> push_input(2) |> run() |> output()
+  defp part1(), do: Intcode.new(__MODULE__) |> Intcode.run([1]) |> Intcode.outputs()
+  defp part2(), do: Intcode.new(__MODULE__) |> Intcode.run([2]) |> Intcode.outputs()
 
-  defp run(machine) do
-    machine
-    |> Map.put(:state, :ready)
-    |> Stream.iterate(&execute_instruction/1)
-    |> Stream.drop_while(&(&1.state == :ready))
-    |> Enum.at(0)
-  end
+  defmodule Intcode do
+    # ------------------------------------------------------------------------
+    # API
+    # ------------------------------------------------------------------------
 
-  defp execute_instruction(%{ip: ip} = machine) do
-    code = mem_read(machine, ip)
-    {fun, arity} = fun_info(code)
-
-    with %{state: :ready, ip: ^ip} = machine <- apply(fun, [machine | parameters(machine, code, arity)]),
-         do: update_in(machine.ip, &(&1 + arity + 1))
-  end
-
-  defp fun_info(code) do
-    opcode = rem(code, 100)
-    fun = Map.fetch!(instruction_table(), opcode)
-    {:arity, arity} = Function.info(fun, :arity)
-    {fun, arity - 1}
-  end
-
-  defp parameters(machine, code, arity) do
-    Stream.unfold(
-      {1, div(code, 100)},
-      fn {offset, mode_acc} ->
-        value = mem_read(machine, machine.ip + offset)
-        mode = param_mode(rem(mode_acc, 10))
-        {{mode, value}, {offset + 1, div(mode_acc, 10)}}
-      end
-    )
-    |> Enum.take(arity)
-  end
-
-  defp param_mode(0), do: :positional
-  defp param_mode(1), do: :immediate
-  defp param_mode(2), do: :relative
-
-  defp instruction_table() do
-    %{
-      1 => &add/4,
-      2 => &mul/4,
-      3 => &input/2,
-      4 => &output/2,
-      5 => &jump_if_true/3,
-      6 => &jump_if_false/3,
-      7 => &less_than/4,
-      8 => &equals/4,
-      9 => &adjust_relative_base/2,
-      99 => &halt/1
-    }
-  end
-
-  defp add(machine, param1, param2, param3),
-    do: write(machine, param3, read(machine, param1) + read(machine, param2))
-
-  defp mul(machine, param1, param2, param3),
-    do: write(machine, param3, read(machine, param1) * read(machine, param2))
-
-  defp input(machine, param) do
-    case :queue.out(machine.input) do
-      {:empty, _queue} ->
-        %{machine | state: :awaiting_input}
-
-      {{:value, value}, input} ->
-        machine = %{machine | input: input}
-        write(machine, param, value)
+    def new(module) do
+      %{
+        state: :ready,
+        ip: 0,
+        relative_base: 0,
+        memory: initial_memory(module),
+        input: :queue.new(),
+        output: []
+      }
     end
-  end
 
-  defp output(machine, param) do
-    output = read(machine, param)
-    update_in(machine.output, &[&1, output])
-  end
+    def run(computer, inputs \\ []) do
+      computer
+      |> push_inputs(inputs)
+      |> Map.put(:state, :ready)
+      |> Stream.iterate(&execute_instruction/1)
+      |> Enum.find(&(&1.state != :ready))
+    end
 
-  defp jump_if_true(machine, param1, param2) do
-    if read(machine, param1) != 0, do: jump(machine, read(machine, param2)), else: machine
-  end
+    def outputs(computer), do: List.flatten(computer.output)
 
-  defp jump_if_false(machine, param1, param2) do
-    if read(machine, param1) == 0, do: jump(machine, read(machine, param2)), else: machine
-  end
+    def pop_outputs(computer), do: {outputs(computer), %{computer | output: []}}
 
-  defp less_than(machine, param1, param2, param3) do
-    value = if read(machine, param1) < read(machine, param2), do: 1, else: 0
-    write(machine, param3, value)
-  end
+    # ------------------------------------------------------------------------
+    # Instructions
+    # ------------------------------------------------------------------------
 
-  defp equals(machine, param1, param2, param3) do
-    value = if read(machine, param1) == read(machine, param2), do: 1, else: 0
-    write(machine, param3, value)
-  end
+    defp instruction_table() do
+      %{
+        1 => &add/4,
+        2 => &mul/4,
+        3 => &input/2,
+        4 => &output/2,
+        5 => &jump_if_true/3,
+        6 => &jump_if_false/3,
+        7 => &less_than/4,
+        8 => &equals/4,
+        9 => &adjust_relative_base/2,
+        99 => &halt/1
+      }
+    end
 
-  defp adjust_relative_base(machine, param),
-    do: update_in(machine.relative_base, &(&1 + read(machine, param)))
+    defp add(computer, param1, param2, param3),
+      do: write(computer, param3, read(computer, param1) + read(computer, param2))
 
-  defp halt(machine), do: %{machine | state: :halted}
+    defp mul(computer, param1, param2, param3),
+      do: write(computer, param3, read(computer, param1) * read(computer, param2))
 
-  defp jump(machine, where), do: %{machine | ip: where}
+    defp input(computer, param) do
+      case :queue.out(computer.input) do
+        {:empty, _queue} ->
+          %{computer | state: :awaiting_input}
 
-  defp push_input(machine, value), do: update_in(machine.input, &:queue.in(value, &1))
-  defp push_inputs(machine, values), do: Enum.reduce(values, machine, &push_input(&2, &1))
+        {{:value, value}, input} ->
+          computer = %{computer | input: input}
+          write(computer, param, value)
+      end
+    end
 
-  defp pop_outputs(machine), do: {List.flatten(machine.output), %{machine | output: []}}
-  defp output(machine), do: List.flatten(machine.output)
+    defp output(computer, param) do
+      output = read(computer, param)
+      update_in(computer.output, &[&1, output])
+    end
 
-  defp write(machine, {:relative, address}, value),
-    do: write(machine, {:positional, machine.relative_base + address}, value)
+    defp jump_if_true(computer, param1, param2) do
+      if read(computer, param1) != 0, do: jump(computer, read(computer, param2)), else: computer
+    end
 
-  defp write(machine, {:positional, address}, value), do: put_in(machine.memory[address], value)
+    defp jump_if_false(computer, param1, param2) do
+      if read(computer, param1) == 0, do: jump(computer, read(computer, param2)), else: computer
+    end
 
-  defp read(machine, {:positional, address}), do: mem_read(machine, address)
-  defp read(machine, {:relative, address}), do: read(machine, {:positional, machine.relative_base + address})
-  defp read(_machine, {:immediate, value}), do: value
+    defp less_than(computer, param1, param2, param3) do
+      value = if read(computer, param1) < read(computer, param2), do: 1, else: 0
+      write(computer, param3, value)
+    end
 
-  defp mem_read(machine, address) when address >= 0, do: Map.get(machine.memory, address, 0)
+    defp equals(computer, param1, param2, param3) do
+      value = if read(computer, param1) == read(computer, param2), do: 1, else: 0
+      write(computer, param3, value)
+    end
 
-  defp machine() do
-    %{
-      state: :ready,
-      ip: 0,
-      relative_base: 0,
-      memory: initial_memory(),
-      input: :queue.new(),
-      output: []
-    }
-  end
+    defp adjust_relative_base(computer, param),
+      do: update_in(computer.relative_base, &(&1 + read(computer, param)))
 
-  defp initial_memory() do
-    Aoc.input_file(__MODULE__)
-    |> File.read!()
-    |> String.trim()
-    |> String.split(",")
-    |> Stream.with_index()
-    |> Stream.map(fn {value, index} -> {index, String.to_integer(value)} end)
-    |> Map.new()
+    defp halt(computer), do: %{computer | state: :halted}
+
+    # ------------------------------------------------------------------------
+    # Private
+    # ------------------------------------------------------------------------
+
+    defp execute_instruction(%{ip: ip} = computer) do
+      code = mem_read(computer, ip)
+      {fun, arity} = fun_info(code)
+
+      with %{state: :ready, ip: ^ip} = computer <- apply(fun, [computer | parameters(computer, code, arity)]),
+           do: update_in(computer.ip, &(&1 + arity + 1))
+    end
+
+    defp fun_info(code) do
+      opcode = rem(code, 100)
+      fun = Map.fetch!(instruction_table(), opcode)
+      {:arity, arity} = Function.info(fun, :arity)
+      {fun, arity - 1}
+    end
+
+    defp parameters(computer, code, arity) do
+      Stream.unfold(
+        {1, div(code, 100)},
+        fn {offset, mode_acc} ->
+          value = mem_read(computer, computer.ip + offset)
+          mode = param_mode(rem(mode_acc, 10))
+          {{mode, value}, {offset + 1, div(mode_acc, 10)}}
+        end
+      )
+      |> Enum.take(arity)
+    end
+
+    defp param_mode(0), do: :positional
+    defp param_mode(1), do: :immediate
+    defp param_mode(2), do: :relative
+
+    defp jump(computer, where), do: %{computer | ip: where}
+
+    defp push_input(computer, value), do: update_in(computer.input, &:queue.in(value, &1))
+    defp push_inputs(computer, values), do: Enum.reduce(values, computer, &push_input(&2, &1))
+
+    defp write(computer, address, value), do: put_in(computer.memory[param_addr(computer, address)], value)
+
+    defp read(_computer, {:immediate, value}), do: value
+    defp read(computer, address), do: mem_read(computer, param_addr(computer, address))
+
+    defp param_addr(_computer, {:positional, address}), do: address
+    defp param_addr(computer, {:relative, address}), do: computer.relative_base + address
+
+    defp mem_read(computer, address) when address >= 0, do: Map.get(computer.memory, address, 0)
+
+    defp initial_memory(module) do
+      Aoc.input_file(module)
+      |> File.read!()
+      |> String.trim()
+      |> String.split(",")
+      |> Stream.with_index()
+      |> Stream.map(fn {value, index} -> {index, String.to_integer(value)} end)
+      |> Map.new()
+    end
   end
 end
