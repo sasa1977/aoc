@@ -100,10 +100,9 @@ defmodule Aoc201911 do
       }
     end
 
-    def run(computer, inputs \\ []) do
+    def run(%{state: state} = computer, inputs \\ []) when state in [:ready, :awaiting_input] do
       computer
       |> push_inputs(inputs)
-      |> Map.put(:state, :ready)
       |> Stream.iterate(&execute_instruction/1)
       |> Enum.find(&(&1.state != :ready))
     end
@@ -213,7 +212,7 @@ defmodule Aoc201911 do
 
     defp jump(computer, where), do: %{computer | ip: where}
 
-    defp push_input(computer, value), do: update_in(computer.input, &:queue.in(value, &1))
+    defp push_input(computer, value), do: %{computer | input: :queue.in(value, computer.input), state: :ready}
     defp push_inputs(computer, values), do: Enum.reduce(values, computer, &push_input(&2, &1))
 
     defp write(computer, address, value), do: put_in(computer.memory[param_addr(computer, address)], value)
