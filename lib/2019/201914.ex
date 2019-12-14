@@ -8,51 +8,51 @@ defmodule Aoc201914 do
   defp part2, do: binary_search(&(fuel_price(&1) <= 1_000_000_000_000))
 
   defp binary_search(criteria) do
-    impossible = 1 |> Stream.iterate(&(&1 * 2)) |> Enum.find(&(not criteria.(&1)))
-
-    {max_possible, _impossible} =
-      Stream.iterate(
-        {1, impossible},
-        fn {possible, impossible} ->
-          next = div(possible + impossible, 2)
-          if criteria.(next), do: {next, impossible}, else: {possible, next}
-        end
-      )
-      |> Enum.find(fn {possible, impossible} -> possible == impossible - 1 end)
-
-    max_possible
-  end
-
-  defp fuel_price(amount) do
-    {ore, _stock} = price("FUEL", amount, reactions(), %{})
-    ore
-  end
-
-  defp price("ORE", required, _reactions, stock), do: {required, stock}
-  defp price(_, 0, _reactions, stock), do: {0, stock}
-
-  defp price(chemical, required, reactions, stock) do
-    available = Map.get(stock, chemical, 0)
-    taken_from_stock = min(available, required)
-    remaining = max(available - taken_from_stock, 0)
-    required = max(required - taken_from_stock, 0)
-    stock = Map.put(stock, chemical, remaining)
-
-    {produced, ingredients} = Map.fetch!(reactions, chemical)
-    application_count = ceil(required / produced)
-
-    surplus = application_count * produced - required
-    stock = Map.update(stock, chemical, surplus, &(&1 + surplus))
-
-    Enum.reduce(
-      ingredients,
-      {0, stock},
-      fn {chemical, required}, {ore, stock} ->
-        {required_ore, stock} = price(chemical, application_count * required, reactions, stock)
-        {ore + required_ore, stock}
+    Stream.iterate(
+      %{possible: 1, impossible: some_impossible(criteria)},
+      fn result ->
+        next = div(result.possible + result.impossible, 2)
+        kind = if criteria.(next), do: :possible, else: :impossible
+        Map.put(result, kind, next)
       end
     )
+    |> Enum.find(&(&1.possible == &1.impossible - 1))
+    |> Map.fetch!(:possible)
   end
+
+  defp some_impossible(criteria), do: Enum.find(powers_of_two(), &(not criteria.(&1)))
+  defp powers_of_two, do: Stream.iterate(1, &(&1 * 2))
+
+  defp fuel_price(amount) do
+    {price, _stock} = price({"FUEL", amount}, %{}, reactions())
+    price
+  end
+
+  defp price({"ORE", amount}, stock, _reactions), do: {amount, stock}
+  defp price({_chemical, 0}, stock, _reactions), do: {0, stock}
+
+  defp price({chemical, amount}, stock, reactions) do
+    {amount, stock} = take_from_stock(stock, chemical, amount)
+    {produced, ingredients} = formula(reactions, chemical, amount)
+    {prices, stock} = Enum.map_reduce(ingredients, stock, &price(&1, &2, reactions))
+    {Enum.sum(prices), add_to_stock(stock, chemical, produced - amount)}
+  end
+
+  defp formula(reactions, chemical, amount) do
+    {produced, ingredients} = Map.fetch!(reactions, chemical)
+    num_applications = div(amount + produced - 1, produced)
+    ingredients = Enum.map(ingredients, fn {chemical, quantity} -> {chemical, num_applications * quantity} end)
+    {produced * num_applications, ingredients}
+  end
+
+  defp take_from_stock(stock, chemical, amount) do
+    available = Map.get(stock, chemical, 0)
+    taken = min(available, amount)
+    {amount - taken, add_to_stock(stock, chemical, -taken)}
+  end
+
+  defp add_to_stock(stock, chemical, amount),
+    do: Map.update(stock, chemical, amount, &(&1 + amount))
 
   defp reactions() do
     Aoc.input_lines(__MODULE__)
