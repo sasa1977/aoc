@@ -38,8 +38,8 @@ defmodule Aoc201915 do
     |> Stream.iterate(fn trace_step ->
       for(robot <- trace_step.tracers, dir <- ~w/north south east west/a, do: {robot, dir, move(robot.pos, dir)})
       |> Stream.uniq_by(fn {_robot, _dir, pos} -> pos end)
-      |> Stream.reject(&MapSet.member?(trace_step.visited, &1))
-      |> Stream.reject(&MapSet.member?(trace_step.walls, &1))
+      |> Stream.reject(fn {_robot, _dir, pos} -> MapSet.member?(trace_step.visited, pos) end)
+      |> Stream.reject(fn {_robot, _dir, pos} -> MapSet.member?(trace_step.walls, pos) end)
       |> Enum.reduce(%{trace_step | tracers: []}, &move_robot(&2, &1))
     end)
   end
