@@ -15,7 +15,7 @@ defmodule Aoc201915 do
   defp part2 do
     map = Enum.find(trace_steps(), &Enum.empty?(&1.tracers))
 
-    %{oxygen_edges: [map.oxygen_system_pos], avoid: map.walls}
+    %{oxygen_edges: [map.oxygen_system_pos], avoid: MapSet.put(map.walls, map.oxygen_system_pos)}
     |> Stream.iterate(fn expansion_step ->
       for(pos <- expansion_step.oxygen_edges, dir <- ~w/north south east west/a, do: move(pos, dir))
       |> Stream.uniq()
@@ -25,8 +25,8 @@ defmodule Aoc201915 do
         &%{&2 | oxygen_edges: [&1 | &2.oxygen_edges], avoid: MapSet.put(&2.avoid, &1)}
       )
     end)
-    |> Stream.take_while(&(not Enum.empty?(&1.oxygen_edges)))
-    |> Enum.count()
+    |> Enum.find_index(&Enum.empty?(&1.oxygen_edges))
+    # Subtract 1, because the area has been filled in the previous step.
     |> Kernel.-(1)
   end
 
