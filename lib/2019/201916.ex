@@ -12,7 +12,7 @@ defmodule Aoc201916 do
 
   defp part2 do
     elements = elements() |> List.duplicate(10_000) |> List.flatten()
-    target_pos = elements |> Stream.take(7) |> Enum.reduce(0, &(&2 * 10 + &1))
+    target_pos = elements |> Enum.take(7) |> Integer.undigits()
 
     # this solution works only if the target sequence is in the second half
     true = target_pos >= div(length(elements), 2)
@@ -27,14 +27,14 @@ defmodule Aoc201916 do
   # of the input. In such case, we can compute next sequence by cummulatively adding elements from the end.
   # In other words, given the input sequence (a, b, c), the next sequence is (rem(a+b+c, 10), rem(b+c, 10), rem(c, 10)).
   defp next_phase_naive(elements) do
-    {_, elements} =
-      List.foldr(
-        elements,
-        {0, []},
-        fn element, {sum, elements} -> {sum + element, [sum + element | elements]} end
-      )
-
-    Enum.map(elements, &rem(&1, 10))
+    List.foldr(
+      elements,
+      [],
+      fn
+        element, [] -> [element]
+        element, [previous | _] = rest -> [rem(element + previous, 10) | rest]
+      end
+    )
   end
 
   defp next_phase(elements) do
