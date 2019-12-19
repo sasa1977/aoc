@@ -1,21 +1,42 @@
 defmodule Aoc201918 do
   def run do
-    IO.inspect(part1())
+    Aoc.output(&part1/0)
+    Aoc.output(&part2/0)
   end
 
   defp part1() do
     map = map()
+    min_path(map, [map.my_pos])
+  end
 
+  defp part2() do
+    map =
+      for dx <- -1..1, dy <- -1..1, dx == 0 or dy == 0, reduce: map() do
+        map ->
+          {x, y} = map.my_pos
+          update_in(map.walls, &MapSet.put(&1, {x + dx, y + dy}))
+      end
+
+    robots = for(dx <- -1..1, dy <- -1..1, dx != 0 and dy != 0, {x, y} = map.my_pos, do: {x + dx, y + dy})
+    min_path(map, robots)
+  end
+
+  defp min_path(map, robots) do
     neighbours =
-      [map.my_pos | Map.keys(map.keys)]
+      Enum.concat(robots, Map.keys(map.keys))
       |> Stream.map(&{&1, trace(map, &1)})
       |> Map.new()
 
-    {running_min, _visited} = try_paths(map, map.my_pos, neighbours)
+    {running_min, _visited} = try_paths(map, neighbours, List.to_tuple(robots))
     running_min
   end
 
-  defp try_paths(map, at, neighbours, acquired_keys \\ MapSet.new(), steps \\ 0, running_min \\ nil, visited \\ %{}) do
+  defp try_paths(map, neighbours, robots),
+    do: try_paths(map, neighbours, robots, 0, MapSet.new(), 0, nil, %{})
+
+  defp try_paths(map, neighbours, robots, robot, acquired_keys, steps, running_min, visited) do
+    at = elem(robots, robot)
+
     cond do
       not is_nil(running_min) and steps >= running_min ->
         {running_min, visited}
@@ -24,13 +45,23 @@ defmodule Aoc201918 do
         {min(steps, running_min || steps + 1), visited}
 
       Enum.any?(
-        Map.get(visited, at, []),
+        Map.get(visited, {robots, robot}, []),
         fn {seen_keys, seen_steps} -> MapSet.subset?(acquired_keys, seen_keys) and seen_steps <= steps end
       ) ->
         {running_min, visited}
 
       true ->
-        visited = Map.update(visited, at, [{acquired_keys, steps}], &[{acquired_keys, steps} | &1])
+        visited = Map.update(visited, {robots, robot}, [{acquired_keys, steps}], &[{acquired_keys, steps} | &1])
+
+        result_from_next =
+          if tuple_size(robots) > 1 do
+            # If there are multiple robots, try with the next one first.
+            # This ensures we try all possible combinations of robot moves.
+            next_robot = rem(robot + 1, tuple_size(robots))
+            try_paths(map, neighbours, robots, next_robot, acquired_keys, steps, running_min, visited)
+          else
+            {running_min, visited}
+          end
 
         neighbours
         |> Map.fetch!(at)
@@ -38,11 +69,12 @@ defmodule Aoc201918 do
         |> Stream.reject(&is_nil/1)
         |> Enum.sort_by(& &1.distance)
         |> Enum.reduce(
-          {running_min, visited},
+          result_from_next,
           fn node, {best_path, visited} ->
             steps = steps + node.distance
             acquired_keys = MapSet.put(acquired_keys, node.door)
-            try_paths(map, node.at, neighbours, acquired_keys, steps, best_path, visited)
+            robots = put_elem(robots, robot, node.at)
+            try_paths(map, neighbours, robots, robot, acquired_keys, steps, best_path, visited)
           end
         )
     end
