@@ -2,8 +2,8 @@ defmodule Aoc201917 do
   alias __MODULE__.Intcode
 
   def run do
-    IO.inspect(part1())
-    IO.inspect(part2())
+    Aoc.output(&part1/0)
+    Aoc.output(&part2/0)
   end
 
   defp part1 do
@@ -105,14 +105,11 @@ defmodule Aoc201917 do
   defp programs(list) do
     len = Enum.count(list)
 
-    for len_a <- 1..len,
-        len_b <- 1..len,
-        len_c <- 1..len,
-        pos_b <- len_a..(len - (len_b + len_c)),
-        pos_b > 0,
+    for len_a <- 1..(len - 2),
+        len_b <- 1..(len - (len_a + 1)),
+        len_c <- 1..(len - (len_a + len_b)),
+        pos_b <- len_a..(len - len_b - 1),
         pos_c <- (pos_b + len_b)..(len - len_c),
-        pos_c > 0,
-        len_a + len_b + len_c + pos_b + pos_c <= len,
         a = Enum.take(list, len_a),
         b = list |> Enum.drop(pos_b) |> Enum.take(len_b),
         c = list |> Enum.drop(pos_c) |> Enum.take(len_c),
