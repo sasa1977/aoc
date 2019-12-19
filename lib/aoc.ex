@@ -16,4 +16,10 @@ defmodule Aoc do
     |> File.stream!()
     |> Stream.map(&String.trim/1)
   end
+
+  def output(fun) do
+    {time, solution} = :timer.tc(fun)
+    if is_binary(solution), do: IO.puts(solution), else: IO.inspect(solution)
+    IO.puts("#{IO.ANSI.light_black()}#{div(time, 1000)} ms#{IO.ANSI.reset()}\n")
+  end
 end
