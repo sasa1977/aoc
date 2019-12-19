@@ -2,8 +2,8 @@ defmodule Aoc201919 do
   alias __MODULE__.Intcode
 
   def run do
-    IO.inspect(part1())
-    IO.inspect(part2())
+    Aoc.output(&part1/0)
+    Aoc.output(&part2/0)
   end
 
   defp part1 do
