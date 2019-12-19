@@ -13,15 +13,14 @@ defmodule Aoc201919 do
   end
 
   defp part2 do
-    square = pulls(10_000) |> largest_squares() |> Enum.find(&(&1.dimension == 100))
-    square.x * 10_000 + square.y
-  end
+    square =
+      pulls(10_000)
+      |> Stream.chunk_every(100, 1, :discard)
+      |> Stream.map(&largest_square/1)
+      |> Stream.reject(&is_nil/1)
+      |> Enum.find(&(&1.dimension == 100))
 
-  defp largest_squares(pulls) do
-    pulls
-    |> Stream.chunk_every(100, 1, :discard)
-    |> Stream.map(&largest_square/1)
-    |> Stream.reject(&is_nil/1)
+    square.x * 10_000 + square.y
   end
 
   defp largest_square(pulls) do
