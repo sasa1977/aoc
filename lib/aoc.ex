@@ -11,10 +11,10 @@ defmodule Aoc do
     Path.join([Application.app_dir(:aoc, "priv"), "#{year}", "day#{day}.in"])
   end
 
-  def input_lines(module) do
+  def input_lines(module, trimmer \\ &String.trim/1) do
     input_file(module)
     |> File.stream!()
-    |> Stream.map(&String.trim/1)
+    |> Stream.map(trimmer)
   end
 
   def output(fun) do
