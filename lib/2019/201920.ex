@@ -4,58 +4,57 @@ defmodule Aoc201920 do
     Aoc.output(&part2/0)
   end
 
-  defp part1() do
-    {map, start} = map()
-    shortest_path(map, [{start, 0}], &simple_transport/3)
-  end
+  defp part1(), do: shortest_path(map(), &simple_transport/3)
+  defp part2(), do: shortest_path(map(), &recursive_transport/3)
 
-  defp part2() do
-    {map, start} = map()
-    shortest_path(map, [{start, 0}], &recursive_transport/3)
-  end
+  defp simple_transport(map, portal, position),
+    do: if(not is_nil(portal.to), do: %{position | pos: transport_destination(map, portal)})
 
-  defp simple_transport(map, portal, 0) do
-    if not is_nil(portal.to) do
-      new_pos = portal.to |> neighbours() |> Enum.find(&(Map.get(map, &1) == :tile))
-      {new_pos, 0}
+  defp recursive_transport(map, portal, position) do
+    if not is_nil(portal.to) and (not portal.outer? or position.level > 0) do
+      new_pos = transport_destination(map, portal)
+      new_level = position.level + if(portal.outer?, do: -1, else: 1)
+      %{position | pos: new_pos, level: new_level}
     end
   end
 
-  defp recursive_transport(map, portal, level) do
-    if not portal.outer? or level > 0 do
-      with {new_pos, 0} when not is_nil(new_pos) <- simple_transport(map, portal, 0) do
-        new_pos = portal.to |> neighbours() |> Enum.find(&(Map.get(map, &1) == :tile))
-        new_level = level + if portal.outer?, do: -1, else: 1
-        {new_pos, new_level}
-      end
-    end
+  defp transport_destination(map, portal),
+    do: portal.to |> neighbours() |> Enum.find(&(Map.get(map, &1) == :tile))
+
+  defp shortest_path({map, start}, transporter) do
+    initial_search_step(map, start, transporter)
+    |> Stream.iterate(&next_search_step/1)
+    |> Stream.map(& &1.objects)
+    |> Enum.find_index(&goal_reached?/1)
   end
 
-  defp shortest_path(map, positions, transporter) do
-    Stream.iterate({objects(map, positions), MapSet.new()}, &advance_search(map, transporter, &1))
-    |> Stream.map(fn {objects, _visited} -> objects end)
-    |> Enum.find_index(fn objects -> Enum.any?(objects, &match?({{_pos, 0}, {:portal, %{name: "ZZ"}}}, &1)) end)
-  end
+  defp initial_search_step(map, start, transporter),
+    do: %{map: map, objects: objects(map, [start]), transporter: transporter, visited: MapSet.new()}
 
-  defp advance_search(map, transporter, {objects, visited}) do
+  defp goal_reached?(objects),
+    do: Enum.any?(objects, &match?({%{level: 0}, {:portal, %{name: "ZZ"}}}, &1))
+
+  defp next_search_step(state) do
     next_positions =
-      objects
+      state.objects
       |> Stream.map(fn
         {pos, :tile} -> pos
-        {{_pos, level}, {:portal, portal}} -> transporter.(map, portal, level)
+        {position, {:portal, portal}} -> state.transporter.(state.map, portal, position)
       end)
       |> Stream.reject(&is_nil/1)
-      |> Stream.reject(&MapSet.member?(visited, &1))
+      |> Stream.reject(&MapSet.member?(state.visited, &1))
       |> MapSet.new()
 
-    {objects(map, next_positions), MapSet.union(visited, MapSet.new(Map.keys(objects)))}
+    state
+    |> Map.update!(:visited, &MapSet.union(&1, MapSet.new(Map.keys(state.objects))))
+    |> Map.put(:objects, objects(state.map, next_positions))
   end
 
   defp objects(map, positions) do
     positions
-    |> Enum.flat_map(fn {position, level} -> Enum.map(neighbours(position), &{&1, level}) end)
-    |> Enum.map(fn {pos, level} -> {{pos, level}, Map.get(map, pos)} end)
-    |> Enum.reject(&match?({_pos, nil}, &1))
+    |> Enum.flat_map(fn position -> Enum.map(neighbours(position.pos), &%{position | pos: &1}) end)
+    |> Enum.map(&{&1, Map.get(map, &1.pos)})
+    |> Enum.reject(&match?({_position, nil}, &1))
     |> Map.new()
   end
 
@@ -87,7 +86,7 @@ defmodule Aoc201920 do
       |> neighbours()
       |> Enum.find(&(Map.get(map, &1) == :tile))
 
-    {map, start}
+    {map, %{pos: start, level: 0}}
   end
 
   defp portals(map) do
