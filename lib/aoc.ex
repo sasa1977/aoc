@@ -22,4 +22,17 @@ defmodule Aoc do
     if is_binary(solution), do: IO.puts(solution), else: IO.inspect(solution)
     IO.puts("#{IO.ANSI.light_black()}#{div(time, 1000)} ms#{IO.ANSI.reset()}\n")
   end
+
+  def map(module) do
+    input_lines(module)
+    |> Stream.with_index()
+    |> Stream.flat_map(&map_elements/1)
+  end
+
+  defp map_elements({line, y}) do
+    line
+    |> to_charlist()
+    |> Stream.with_index()
+    |> Stream.map(fn {element, x} -> {{x, y}, element} end)
+  end
 end
